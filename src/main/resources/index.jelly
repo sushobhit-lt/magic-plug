@@ -1,0 +1,7 @@
+<?jelly escape-by-default='true'?>
+<!--
+  This view is used to render the installed plugins page.
+-->
+<div>
+  This plugin integrates users with Selenium Testing on <a href="https://lambdatest.com">Lambdatest</a>Lambdatest provides cross browser testing on Windows, Macs, and real iPhones, iPads, and Android Phones and Tablets.
+</div>
