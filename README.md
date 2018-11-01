@@ -1,5 +1,5 @@
 # Lambdatest Jenkins Plugin
-#### This plugin integrates Jenkins users with Selenium Testing and Screenshot Testing on Lambdatest.com. Lambdatest.com provides cross browser testing of websites, webpages, and web applications on Windows, Macs, and real iPhones, iPads, and Android Phones and Tablets.
+#### This plugin integrates Jenkins users with Selenium Testing  on Lambdatest.com. Lambdatest.com provides cross browser testing of websites, webpages, and web applications on Windows, Macs, and real iPhones, iPads, and Android Phones and Tablets.
 Wiki: https://wiki.jenkins-ci.org/display/JENKINS/
 
 ### Installation
