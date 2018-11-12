@@ -121,15 +121,17 @@ public class LTCredentials extends BaseStandardCredentials implements StandardUs
     public static class DescriptorImpl extends CredentialsDescriptor {
 
         public FormValidation doTestConnection(@QueryParameter("username") final String username, @QueryParameter("authkey") final String authkey) throws IOException, ServletException {
-        	Account account = new Account(username, authkey);
+        	System.out.print("username: "+ username);
+        	System.out.print("authkey: "+ authkey);
+            Account account = new Account(username, authkey);
         	account.init();
-//        	if (account.connectionSuccessful) {
-//        		//account.sendMixpanelEvent("Jenkins Plugin Downloaded"); // track install
-//                return FormValidation.ok("Successful Authentication");
-//            } else {
-//                return FormValidation.error("Error: Bad username or authkey");
-//            }
-            return FormValidation.ok("Successful Authentication");
+        	if (account.connectionSuccessful) {
+        		//account.sendMixpanelEvent("Jenkins Plugin Downloaded"); // track install
+                return FormValidation.ok("Successful Authentication");
+            } else {
+                return FormValidation.error("Error: Bad username or authkey");
+            }
+
         }
 
         @Override

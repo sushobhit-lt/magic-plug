@@ -14,7 +14,7 @@ import org.apache.commons.collections.map.HashedMap;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import com.lambdatest.plugin.Constants;
 public class Selenium
         extends TestTypeApiFactory {
     public Selenium() {
@@ -52,7 +52,7 @@ public class Selenium
         Map<String, String> osJson = new HashedMap();
         osJson = GetOSResult();
         //String[] browserArray = new String[]{"chrome", "edge", "firefox", "opera", "safari"};
-        //out.println("here is the json data: "+osJson);
+        out.println("here is the json data: "+osJson);
         if ((osJson != null) && (!osJson.isEmpty())) {
             for (Map.Entry<String, String> entry1 : osJson.entrySet()) {
                 //make request for browser configure
@@ -62,7 +62,7 @@ public class Selenium
 //                if (osName=="linux"){
 //                    continue;
 //                }
-                String browserJson = req.get("", paramOs);
+                String browserJson = req.get(Constants.configUrl, paramOs);
                 OperatingSystem operatingSystem = new OperatingSystem(osName);
                 //JSONObject obj = new JSONObject(browserJson);
                 //out.println("here is the browser json data for os "+osName+" : "+browserJson);
@@ -103,8 +103,7 @@ public class Selenium
 
     public Map<String, String> GetOSResult() {
         String json = "";
-        //json = req.get("/browsers");
-        json = req.get("");
+        json = req.getBuild(Constants.configUrl);
         Map<String, String> params = new HashMap<>();
         JSONObject obj = new JSONObject(json);
         obj = obj.getJSONObject("os");
@@ -127,7 +126,7 @@ public class Selenium
     public Map<String, String> GetBrowserResult() {
         String json = "";
         //json = req.get("/browsers");
-        json = req.get("");
+        json = req.getBuild(Constants.configUrl);
         Map<String, String> params = new HashMap<>();
         JSONObject obj = new JSONObject(json);
         obj = obj.getJSONObject("browsers");

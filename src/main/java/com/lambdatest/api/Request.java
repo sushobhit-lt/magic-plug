@@ -1,10 +1,6 @@
 package com.lambdatest.api;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
@@ -15,211 +11,256 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.codec.binary.Base64;
+import org.json.JSONObject;
+
 
 @Deprecated
-public class Request
-{
-  String username = null;
-  String password = null;
-  boolean useProxy = false;
-  String proxyUrl;
-  int proxyPort;
-  boolean useProxyCredentials = false;
-  String proxyUsername;
-  String proxyPassword;
-  //private String requestURL = "https://crossbrowsertesting.com/api/v3/";
-  private String requestURL = "https://dev-ml.lambdatest.com/api/v1/capability/";
-  
-  Request(String path, String username, String password)
-  {
-    this.username = username;
-    this.password = password;
-    
-    requestURL += path;
-  }
-  
-  public Request(String path)
-  {
-    requestURL += path;
-  }
-  
-  public void setProxy(String url, int port)
-  {
-    proxyUrl = url;
-    proxyPort = port;
-    useProxy = true;
-  }
-  
-  public void setProxyCredentials(String username, String password)
-  {
-    proxyUsername = username;
-    proxyPassword = password;
-    useProxyCredentials = true;
-  }
-  
-  public String get(String urlStr)
-  {
-    try
-    {
-      String requestString = requestURL + urlStr;
-      URL url = new URL(requestString);
-      HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-      if (useProxy)
-      {
-        Proxy proxy = new Proxy(Type.HTTP, new InetSocketAddress(proxyUrl, proxyPort));
-        conn = (HttpURLConnection)url.openConnection(proxy);
-        if (useProxyCredentials) {
-          Authenticator.setDefault(new SimpleAuthenticator(proxyUsername, proxyPassword));
-        }
-      }
-      conn.setRequestMethod("GET");
-      if ((username != null) && (password != null))
-      {
-        String userpassEncoding = Base64.encodeBase64String((username + ":" + password).getBytes());
-        conn.setRequestProperty("Authorization", "Basic " + userpassEncoding);
-      }
-      if (conn.getResponseCode() != 200) {
-        throw new IOException(conn.getResponseMessage());
-      }
-      BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-      StringBuilder sb = new StringBuilder();
-      String line;
-      while ((line = rd.readLine()) != null) {
-        sb.append(line);
-      }
-      rd.close();
-      conn.disconnect();
-      return sb.toString();
+public class Request {
+    String username = null;
+    String password = null;
+    boolean useProxy = false;
+    String proxyUrl;
+    int proxyPort;
+    boolean useProxyCredentials = false;
+    String proxyUsername;
+    String proxyPassword;
+    //private String requestURL = "https://crossbrowsertesting.com/api/v3/";
+    private String requestURL;
+
+    Request(String path, String username, String password) {
+        this.username = username;
+        this.password = password;
+        requestURL = path;
+        //System.out.print(requestURL);
+
     }
-    catch (IOException ioe) {}
-    return "";
-  }
-  
-  public String get(String urlStr, Map<String, String> params)
-  {
-    urlStr = urlStr + "?";
-    int index = 1;
-    try
-    {
-      for (Entry<String, String> entry : params.entrySet())
-      {
-        urlStr = urlStr + (String)entry.getKey() + "=" + URLEncoder.encode((String)entry.getValue(), "UTF-8");
-        if (index < params.size()) {
-          urlStr = urlStr + "&";
-        }
-        index++;
-      }
+
+    public Request(String path) {
+        requestURL = path;
+
     }
-    catch (UnsupportedEncodingException localUnsupportedEncodingException1) {}
-    return get(urlStr);
-  }
-  
-  private String doRequestWithFormParams(String method, String urlStr, Map<String, Object> params)
-  {
-    String urlParameters = "";
-    try
-    {
-      if ((params != null) && (!params.isEmpty())) {
-        for (Entry<String, Object> entry : params.entrySet())
-        {
-          String key = (String)entry.getKey();
-          Object value = entry.getValue();
-          if (!urlParameters.isEmpty()) {
-            urlParameters = urlParameters + "&";
-          }
-          if ((value instanceof Collection)) {
-            for (Object listValue : (Collection)value)
-            {
-              if (!urlParameters.isEmpty()) {
-                urlParameters = urlParameters + "&";
-              }
-              urlParameters = urlParameters + key + "=" + listValue;
+
+    public void setProxy(String url, int port) {
+        proxyUrl = url;
+        proxyPort = port;
+        useProxy = true;
+    }
+
+    public void setProxyCredentials(String username, String password) {
+        proxyUsername = username;
+        proxyPassword = password;
+        useProxyCredentials = true;
+    }
+
+//    public String get(String urlStr) {
+//        try {
+//            String requestString = requestURL + urlStr;
+//            URL url = new URL(requestString);
+//            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+//            if (useProxy) {
+//                Proxy proxy = new Proxy(Type.HTTP, new InetSocketAddress(proxyUrl, proxyPort));
+//                conn = (HttpURLConnection) url.openConnection(proxy);
+//                if (useProxyCredentials) {
+//                    Authenticator.setDefault(new SimpleAuthenticator(proxyUsername, proxyPassword));
+//                }
+//            }
+//            conn.setRequestMethod("GET");
+//            if ((username != null) && (password != null)) {
+//                String userpassEncoding = Base64.encodeBase64String((username + ":" + password).getBytes());
+//                conn.setRequestProperty("Authorization", "Basic " + userpassEncoding);
+//            }
+//            if (conn.getResponseCode() != 200) {
+//                throw new IOException(conn.getResponseMessage());
+//            }
+//            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+//            StringBuilder sb = new StringBuilder();
+//            String line;
+//            while ((line = rd.readLine()) != null) {
+//                sb.append(line);
+//            }
+//            rd.close();
+//            conn.disconnect();
+//            return sb.toString();
+//        } catch (IOException ioe) {
+//        }
+//        return "";
+   // }
+
+    public String get(String requestURL) {
+
+        String json = "";
+
+        JSONObject auth=new JSONObject();
+        auth.put("username",username);
+        auth.put("token",password);
+        json = auth.toString();
+        StringBuffer jsonString = new StringBuffer();
+        try {
+            URL url = new URL(requestURL);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("cache-control", "no-cache");
+            OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream(), "UTF-8");
+            writer.write(json);
+            writer.close();
+            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                jsonString.append(line);
             }
-          } else {
-            urlParameters = urlParameters + key + "=" + value;
-          }
+            br.close();
+            connection.disconnect();
+        } catch (Exception e) {
+            //throw new RuntimeException(e.getMessage());
         }
-      }
-      byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-      URL url = new URL(requestURL + urlStr);
-      HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-      if (useProxy)
-      {
-        Proxy proxy = new Proxy(Type.HTTP, new InetSocketAddress(proxyUrl, proxyPort));
-        conn = (HttpURLConnection)url.openConnection(proxy);
-        if (useProxyCredentials) {
-          Authenticator.setDefault(new SimpleAuthenticator(proxyUsername, proxyPassword));
+        return jsonString.toString();
+    }
+
+    public String getBuild(String requestUrl){
+        System.out.print(requestUrl);
+        try
+        {
+            String requestString = requestUrl;
+            URL url = new URL(requestString);
+            HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+            conn.setRequestMethod("GET");
+//	      if (conn.getResponseCode() != 200) {
+//	        throw new IOException(conn.getResponseMessage());
+
+            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = rd.readLine()) != null) {
+                sb.append(line);
+            }
+            rd.close();
+            conn.disconnect();
+            return sb.toString();
         }
-      }
-      conn.setRequestMethod(method);
-      if ((username != null) && (password != null))
-      {
-        String userpassEncoding = Base64.encodeBase64String((username + ":" + password).getBytes());
-        conn.setRequestProperty("Authorization", "Basic " + userpassEncoding);
-      }
-      conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-      conn.setRequestProperty("charset", "utf-8");
-      conn.setRequestProperty("Content-Length", Integer.toString(postData.length));
-      conn.setDoOutput(true);
-      conn.setUseCaches(false);
-      DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
-      
-      wr.write(postData);
-      wr.flush();
-      wr.close();
-      if (conn.getResponseCode() != 200) {
-        throw new IOException(conn.getResponseMessage());
-      }
-      BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-      StringBuilder sb = new StringBuilder();
-      String line;
-      while ((line = rd.readLine()) != null) {
-        sb.append(line);
-      }
-      rd.close();
-      conn.disconnect();
-      return sb.toString();
+
+        catch (IOException ioe)
+        {
+        }
+
+        return "";
+
     }
-    catch (IOException ioe)
-    {
-      ioe.printStackTrace();
+    public String get(String urlStr, Map<String, String> params) {
+        urlStr = urlStr + "?";
+        int index = 1;
+        try {
+            for (Entry<String, String> entry : params.entrySet()) {
+                urlStr = urlStr + (String) entry.getKey() + "=" + URLEncoder.encode((String) entry.getValue(), "UTF-8");
+                if (index < params.size()) {
+                    urlStr = urlStr + "&";
+                }
+                index++;
+            }
+        } catch (UnsupportedEncodingException localUnsupportedEncodingException1) {
+        }
+        return getBuild(urlStr);
     }
-    return "";
-  }
-  
-  public String post(String urlStr, Map<String, String> params)
-  {
-    return doRequestWithFormParams("POST", urlStr, Collections.unmodifiableMap(params));
-  }
-  
-  public String post(String urlStr, Map<String, Object> params, boolean containsLists)
-  {
-    String url = requestURL + urlStr;
-    return doRequestWithFormParams("POST", urlStr, params);
-  }
-  
-  public String put(String urlStr, Map<String, String> params)
-  {
-    return doRequestWithFormParams("PUT", urlStr, Collections.unmodifiableMap(params));
-  }
-  
-  public String delete(String urlStr)
-  {
-    return delete(urlStr, null, false);
-  }
-  
-  public String delete(String urlStr, Map<String, String> params)
-  {
-    return doRequestWithFormParams("DELETE", urlStr, Collections.unmodifiableMap(params));
-  }
-  
-  public String delete(String urlStr, Map<String, Object> params, boolean containsLists)
-  {
-    return doRequestWithFormParams("DELETE", urlStr, params);
-  }
+
+
+    private String doRequestWithFormParams(String method, String urlStr, Map<String, Object> params) {
+        String urlParameters = "";
+        try {
+            if ((params != null) && (!params.isEmpty())) {
+                for (Entry<String, Object> entry : params.entrySet()) {
+                    String key = (String) entry.getKey();
+                    Object value = entry.getValue();
+                    if (!urlParameters.isEmpty()) {
+                        urlParameters = urlParameters + "&";
+                    }
+                    if ((value instanceof Collection)) {
+                        for (Object listValue : (Collection) value) {
+                            if (!urlParameters.isEmpty()) {
+                                urlParameters = urlParameters + "&";
+                            }
+                            urlParameters = urlParameters + key + "=" + listValue;
+                        }
+                    } else {
+                        urlParameters = urlParameters + key + "=" + value;
+                    }
+                }
+            }
+            byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+            URL url = new URL(requestURL + urlStr);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            if (useProxy) {
+                Proxy proxy = new Proxy(Type.HTTP, new InetSocketAddress(proxyUrl, proxyPort));
+                conn = (HttpURLConnection) url.openConnection(proxy);
+                if (useProxyCredentials) {
+                    Authenticator.setDefault(new SimpleAuthenticator(proxyUsername, proxyPassword));
+                }
+            }
+            conn.setRequestMethod(method);
+            if ((username != null) && (password != null)) {
+                String userpassEncoding = Base64.encodeBase64String((username + ":" + password).getBytes());
+                conn.setRequestProperty("Authorization", "Basic " + userpassEncoding);
+            }
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            conn.setRequestProperty("charset", "utf-8");
+            conn.setRequestProperty("Content-Length", Integer.toString(postData.length));
+            conn.setDoOutput(true);
+            conn.setUseCaches(false);
+            DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+
+            wr.write(postData);
+            wr.flush();
+            wr.close();
+            if (conn.getResponseCode() != 200) {
+                throw new IOException(conn.getResponseMessage());
+            }
+            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = rd.readLine()) != null) {
+                sb.append(line);
+            }
+            rd.close();
+            conn.disconnect();
+            return sb.toString();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+        return "";
+    }
+
+    public String post(String urlStr, Map<String, String> params) {
+        return doRequestWithFormParams("POST", urlStr, Collections.unmodifiableMap(params));
+    }
+
+    public String post(String urlStr, Map<String, Object> params, boolean containsLists) {
+        String url = requestURL + urlStr;
+        return doRequestWithFormParams("POST", urlStr, params);
+    }
+
+    public String put(String urlStr, Map<String, String> params) {
+        return doRequestWithFormParams("PUT", urlStr, Collections.unmodifiableMap(params));
+    }
+
+    public String delete(String urlStr) {
+        return delete(urlStr, null, false);
+    }
+
+    public String delete(String urlStr, Map<String, String> params) {
+        return doRequestWithFormParams("DELETE", urlStr, Collections.unmodifiableMap(params));
+    }
+
+    public String delete(String urlStr, Map<String, Object> params, boolean containsLists) {
+        return doRequestWithFormParams("DELETE", urlStr, params);
+    }
 }
 
 /* Location:

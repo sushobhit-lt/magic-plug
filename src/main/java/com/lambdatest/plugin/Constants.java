@@ -45,7 +45,9 @@ public final class Constants
   public static final String TUNNEL_STOP_MSG = "Stopped Local Tunnel";
   public static final String SELENIUM_START_MSG = "\n---------------------\nSELENIUM TEST RESULTS\n---------------------";
   public static final String CREDENTIALS_INVALID_MSG = "Invalid username or apikey";
-  
+  public static final String AUTH_TOKEN = "";
+  public static final String configUrl = "https://dev-ml.lambdatest.com/api/v1/capability";
+  public static final String authUrl = "https://dev-accounts.lambdatest.com/api/user/token/auth";
   public static final String TUNNEL_USING_TUNNELNAME(String tunnelName)
   {
     return "Going to use tunnel with tunnelname \"" + tunnelName + "\"";

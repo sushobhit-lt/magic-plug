@@ -308,7 +308,7 @@ public class LTBuildWrapper extends BuildWrapper implements Serializable {
         getDescriptor().seleniumApi.setRequest(username, authkey); // add credentials to requests
 
 		startLocalTunnel(listener);
-		startScreenshotsTest(build, listener);
+		//startScreenshotsTest(build, listener);
 
     	return new LTEnvironment(build);
     }
@@ -477,7 +477,7 @@ public class LTBuildWrapper extends BuildWrapper implements Serializable {
 
 				//se.setTestId(seleniumTestId);
 				se.setTestPublicUrl(publicUrl);
-				se.setTestUrl(seleniumTestId);
+				//se.setTestUrl(seleniumTestId);
 //				if(seleniumTestId == null || seleniumTestId.isEmpty()) {
 //					// lets get a phony test id for the contributor if we cant find one for some reason
 //					seleniumTestId = getDescriptor().seleniumApi.getSeleniumTestId(buildName, buildNumber, browserApiName, osApiName, resolution);

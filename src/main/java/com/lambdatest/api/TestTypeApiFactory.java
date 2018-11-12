@@ -83,7 +83,7 @@ public abstract class TestTypeApiFactory
     public Map<String,String> GetOSResult() {
         String json = "";
         //json = req.get("/browsers");
-        json = req.get("");
+        json = req.getBuild("");
         Map<String,String> params = new HashMap<>();
         JSONObject obj = new JSONObject(json);
         obj = obj.getJSONObject("os");

@@ -2,6 +2,8 @@ package com.lambdatest.api;
 
 import java.util.HashMap;
 import java.util.logging.Logger;
+
+import com.lambdatest.plugin.Constants;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -13,7 +15,7 @@ public class Account
   
   public Account(String username, String apikey)
   {
-    super("account", username, apikey);
+    super(Constants.authUrl, username, apikey);
   }
   
   public void init()
@@ -25,11 +27,15 @@ public class Account
   {
     int userId = 0;
     String email = "";
-    String json = req.get("");
+    String json = "";
+
+    json = req.get(Constants.authUrl);
+
+    System.out.print(json);
     try
     {
       JSONObject results = new JSONObject(json);
-      userId = results.getInt("user_id");
+      userId = results.getInt("id");
       email = results.getString("email");
       if ((userId > 0) && (email != null) && (!email.equals("")))
       {
