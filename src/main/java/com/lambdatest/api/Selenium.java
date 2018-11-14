@@ -63,7 +63,8 @@ public class Selenium
 //                    continue;
 //                }
                 String browserJson = req.get(Constants.configUrl, paramOs);
-                OperatingSystem operatingSystem = new OperatingSystem(osName);
+                String osValue = entry1.getValue();
+                OperatingSystem operatingSystem = new OperatingSystem(osValue);
                 //JSONObject obj = new JSONObject(browserJson);
                 //out.println("here is the browser json data for os "+osName+" : "+browserJson);
                 Map<String, String> brJson = new HashMap();
@@ -86,16 +87,25 @@ public class Selenium
                         // out.println(browserName+":"+osName);
                         Browser browser = new Browser(browserName);
                         browsers.add(browser);
-                        browsers2.put(osName, browser);
+                        browsers2.put(osValue, browser);
                         operatingSystem.setBrowser(browser);
-                        operatingSystem.browsers2.put(osName, browser);
+                        operatingSystem.browsers2.put(osValue, browser);
 
                     }
 
 
+
                 }
+                List<String> resArray = new ArrayList<>();
+                resArray = GetResolution();
+                for(String res:resArray ){
+                    Resolution resolution = new Resolution(res);
+                    operatingSystem.resolutions.add(resolution);
+                    operatingSystem.resolutions2.put(res, resolution);
+                }
+
                 this.operatingSystems.add(operatingSystem);
-                this.operatingSystems2.put(osName, operatingSystem);
+                this.operatingSystems2.put(osValue  , operatingSystem);
             }
 
         }
@@ -118,11 +128,28 @@ public class Selenium
         params.put("win8", obj.getString("win8"));
         params.put("win8.1", obj.getString("win8.1"));
         params.put("yosemite", obj.getString("yosemite"));
+
         return params;
 
 
     }
+    public Map<String, String> StoreOSMapping() {
+        Map<String, String> params = new HashMap<>();
 
+        params.put("OS X El Capitan", "elcapitan");
+        params.put("macOS High Sierra", "highsierra");
+        params.put("Linux", "linux");
+        params.put("OS X Mavericks", "mavericks");
+        params.put("macOS Mojave","mojave");
+        params.put("macOS Sierra", "sierra");//make request for browsers,obj.getString("sierra"));
+        params.put("Windows 10", "win10");
+        params.put("Windows 7", "win7");
+        params.put("Windows 8", "win8");
+        params.put("Windows 8.1", "win8.1");
+        params.put("OS X Yosemite", "yosemite");
+
+        return params;
+    }
     public Map<String, String> GetBrowserResult() {
         String json = "";
         //json = req.get("/browsers");
@@ -140,6 +167,19 @@ public class Selenium
         return params;
     }
 
+    public List<String> GetResolution(){
+        List<String> resArray = new ArrayList<>();
+        resArray.add("1024x768");
+        resArray.add("1280x800");
+        resArray.add("1280x1240");
+        resArray.add("1366x768");
+        resArray.add("1440x900");
+        resArray.add("1600x1200");
+        resArray.add("1680x1050");
+        resArray.add("1920x1080");
+        resArray.add("1920x1200");
+        return resArray;
+    }
 
     public String getSeleniumTestId(String name, String build, String browserApiName, String osApiName, String resolution)
             throws IOException {

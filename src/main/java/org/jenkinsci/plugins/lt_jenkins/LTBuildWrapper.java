@@ -20,6 +20,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import com.lambdatest.api.Selenium;
 
 @SuppressWarnings("serial")
 public class LTBuildWrapper extends BuildWrapper implements Serializable {
@@ -293,19 +294,19 @@ public class LTBuildWrapper extends BuildWrapper implements Serializable {
     	 */
 		log.entering(this.getClass().getName(), "setup");
 		log.fine("about to get the credentials using the credentialId");
-        final LTCredentials credentials = LTCredentials.getCredentials(build.getProject(), credentialsId);
-        this.username = credentials.getUsername();
-        this.authkey = credentials.getAuthkey();
-        //track install
-        Account account = new Account(username, authkey);
-        account.init();
-        log.fine("testing the credentials");
-        if (account.connectionSuccessful) {
-        	log.fine("sending a mixpanel event");
-    		account.sendMixpanelEvent("Jenkins Plugin Downloaded");
-        }
-        
-        getDescriptor().seleniumApi.setRequest(username, authkey); // add credentials to requests
+//        final LTCredentials credentials = LTCredentials.getCredentials(build.getProject(), credentialsId);
+//        this.username = credentials.getUsername();
+//        this.authkey = credentials.getAuthkey();
+//        //track install
+//        Account account = new Account(username, authkey);
+//        account.init();
+//        log.fine("testing the credentials");
+//        if (account.connectionSuccessful) {
+//        	log.fine("sending a mixpanel event");
+//    		//account.sendMixpanelEvent("Jenkins Plugin Downloaded");
+//        }
+//
+//        getDescriptor().seleniumApi.setRequest(username, authkey); // add credentials to requests
 
 		startLocalTunnel(listener);
 		//startScreenshotsTest(build, listener);
@@ -391,10 +392,12 @@ public class LTBuildWrapper extends BuildWrapper implements Serializable {
                 makeSeleniumBuildActionFromJSONObject(config);
                 browsers.put(config);
 
-
+                Map<String, String> params = new HashMap<>();
+                Selenium selenium = new Selenium();
+                params = selenium.StoreOSMapping();
                 if (seleniumTests.size() == 1) {
                     JSONObject seTest = seleniumTests.get(0);
-                    String operatingSystemApiName = seTest.getString("operating_system");
+                    String operatingSystemApiName = params.get(seTest.getString("operating_system"));
                     String browserApiName = seTest.getString("browser");
                     String resolution = seTest.getString("resolution");
                     log.info("Going to use old selenium capabilites");

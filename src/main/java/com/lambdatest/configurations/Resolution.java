@@ -7,6 +7,7 @@ public class Resolution
   private String deviceOrientation = "";
   public Resolution(String name){
     super(name);
+    screenResolution = name;
   }
 //  {
 //    super(name, name, device);
@@ -40,10 +41,10 @@ public class Resolution
 //    return "";
 //  }
 //
-//  public String getScreenResolution()
-//  {
-//    return screenResolution;
-//  }
+  public String getScreenResolution()
+  {
+    return screenResolution;
+  }
 //
 //  public void setDeviceOrientation(String deviceOrientation)
 //  {
