@@ -35,9 +35,9 @@ jenkinsPlugin {
 
     developers {
         developer {
-            id 'crossbrowsertesting'
-            name 'CrossBrowserTesting.com LLC'
-            email 'info@crossbrowsertesting.com'
+            id 'Lambdatest'
+            name 'Lambdatest Pvt Ltd'
+            email 'support@lambdatest.com'
         }
     }
     licenses {
@@ -68,22 +68,15 @@ release {
 
 dependencies {
    
-    // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations
-    //compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.7'
     compile group: 'org.json', name: 'json', version:'20151123'
     compile group: 'commons-codec', name: 'commons-codec', version:'1.9'
-    //compile group: 'com.github.crossbrowsertesting', name: 'ci-common', version:'1.4.6'
     testCompile group: 'org.codehaus.mojo', name: 'findbugs-maven-plugin', version: '3.0.4'
-    // https://mvnrepository.com/artifact/com.mashape.unirest/unirest-java
     compile group: 'com.mashape.unirest', name: 'unirest-java', version: '1.4.9'
-    // https://mvnrepository.com/artifact/com.fizzed/jne
     compile group: 'com.fizzed', name: 'jne', version: '3.0.1'
 
     jenkinsPlugins group: 'org.jenkins-ci.plugins', name: 'junit', version: '1.9', ext: 'jar'
     jenkinsPlugins group: 'org.jenkins-ci.plugins', name: 'credentials', version: '2.1.12', ext: 'jar'
-    //jenkinsPlugins group: 'org.jenkins-ci.plugins', name: 'credentials', version: '2.1.16', ext: 'jar'
-    // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core
-    
+
 
 
     jenkinsPlugins group: 'org.jenkins-ci.plugins.workflow', name: 'workflow-step-api', version: '2.12', ext: 'jar'
