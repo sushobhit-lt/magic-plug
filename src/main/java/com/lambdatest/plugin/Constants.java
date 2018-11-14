@@ -26,7 +26,7 @@ public final class Constants
   public static final String TUNNEL_WAITING = "Waiting for the tunnel to establish a connection.";
   public static final String GRID_URL = "LT_GRID_URL";
   public static final String BROWSER_VERSION = "LT_BROWSER_VERSION";
-  public static String gridUrl = "https://dev-ml.lambdatest.com/wd/hub";
+  public static String gridUrl = "https://nikhily:rXYZZ65YGLPS8BzgVtQGMzvpLgHP8EbbTEecJhwS2U8IhkkeFg@dev-ml.lambdatest.com/wd/hub";
   public static String browserVersion;
   @Deprecated
   public static final String TUNNEL_USING = "Going to use tunnel";
