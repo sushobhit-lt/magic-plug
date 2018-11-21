@@ -7,9 +7,10 @@ import hudson.tasks.BuildWrapper;
 import net.sf.json.JSONObject;
 import org.json.JSONArray;
 import org.kohsuke.stapler.DataBoundConstructor;
+import hudson.FilePath;
 
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -116,7 +117,6 @@ public class LTBuildWrapper extends BuildWrapper implements Serializable {
                     browserApiName = arrOfBr[0];
                     System.out.print(browserApiName);
                     Constants.browserVersion = arrOfBr[1] + ".0";
-
                     env.put(Constants.OPERATINGSYSTEM, operatingSystemApiName);
                     Constants.output.put(Constants.OPERATINGSYSTEM,operatingSystemApiName);
                     Constants.output.put(Constants.BROWSER,browserApiName);
@@ -134,6 +134,8 @@ public class LTBuildWrapper extends BuildWrapper implements Serializable {
                 env.put(Constants.BUILDNAME, buildname);
                 env.put(Constants.BUILDNUMBER, buildnumber);
                 env.put(Constants.pluginUrl, "jenkins");
+                Constants.output.put(Constants.videoUrl,"https://www.lambdatest.com");
+                Constants.output.put(   Constants.logUrl,"https://www.360logica.com");
                 //define grid url here
                 String gridurl= String.format("https://%s:%s@dev-ml.lambdatest.com/wd/hub",username,authkey );
                 env.put(Constants.GRID_URL,gridurl);
@@ -143,13 +145,50 @@ public class LTBuildWrapper extends BuildWrapper implements Serializable {
                 log.exiting(this.getClass().getName(), "buildEnvVars");
             }
         }
+        private String generateReport(LTBuildResults stats) throws IOException {
+            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+            try {
+                InputStream in = LTBuildResults.class.getResourceAsStream(Constants.REPORT_TEMPLATE_PATH);
+                if(in==null){
+                    System.out.println("file is null");
+                }
+                byte[] buffer = new byte[1024];
+                int read;
+                while ((read = in.read(buffer)) >= 0) {
+                    bOut.write(buffer, 0, read);
+                }
+            }catch (Exception c){
+
+            }
+            String content = new String(bOut.toByteArray(), StandardCharsets.UTF_8);
+            content = content.replace(Constants.STATUS, String.valueOf(stats.getStatus()));
+            content = content.replace(Constants.CONFIG_INFO, String.valueOf(stats.getConfigInfo()));
+            content = content.replace(Constants.VIDEO,Constants.output.get(Constants.videoUrl));
+            content = content.replace(Constants.LOGS,Constants.output.get(Constants.logUrl));
+            return content;
+        }
 
         @Override
         public boolean tearDown(AbstractBuild build, BuildListener listener) throws IOException, InterruptedException {
             log.entering(this.getClass().getName(), "teardown");
             listener.getLogger().println("-------Here are your environment variables-------------------");
             listener.getLogger().println("output of env" + Constants.output);
-
+            boolean status = true;
+            LTBuildResults result = new LTBuildResults(Constants.output.get(Constants.OPERATINGSYSTEM),Constants.output.get(Constants.BROWSER),status);
+            String report = generateReport(result);
+            File artifactsDir = build.getArtifactsDir();
+            if (!artifactsDir.isDirectory()) {
+                boolean success = artifactsDir.mkdirs();
+                if (!success) {
+                    listener.getLogger().println("Can't create artifacts directory at "
+                        + artifactsDir.getAbsolutePath());
+                }
+            }
+            String path = artifactsDir.getCanonicalPath() + Constants.REPORT_TEMPLATE_PATH;
+            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path),
+                StandardCharsets.UTF_8))) {
+                writer.write(report);
+            }
             return true;
         }
 

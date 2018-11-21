@@ -48,12 +48,18 @@ public final class Constants
     public static final String AUTH_TOKEN = "";
     public static final String configUrl = "https://dev-ml.lambdatest.com/api/v1/capability";
     public static final String authUrl = "https://dev-accounts.lambdatest.com/api/user/token/auth";
+    public static final String videoUrl = "VIDEOURL";
+    public static final String logUrl = "LOGURL";
     public static final String TUNNEL_USING_TUNNELNAME(String tunnelName)
     {
         return "Going to use tunnel with tunnelname \"" + tunnelName + "\"";
     }
     public static final HashMap<String,String> output=new HashMap<>();
-
+    public static final String REPORT_TEMPLATE_PATH = "/stats.html";
+    public static final String CONFIG_INFO = "$CONFIG_INFO$";
+    public static final String STATUS = "$STATUS$";
+    public static final String VIDEO = "$VIDEO$";
+    public static final String LOGS = "$LOGS$";
     private Constants()
     {
         throw new AssertionError();
