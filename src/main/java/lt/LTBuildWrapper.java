@@ -11,32 +11,28 @@ import hudson.FilePath;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 
 public class LTBuildWrapper extends BuildWrapper implements Serializable {
     private final static Logger log = Logger.getLogger(LTBuildWrapper.class.getName());
-    private String authkey,username,credentialsId;
+    private String authkey, username, credentialsId;
+
     @DataBoundConstructor
-    public LTBuildWrapper(List<JSONObject> seleniumTests,String credentialsId) {
+    public LTBuildWrapper(List<JSONObject> seleniumTests, String credentialsId) {
         /*
          * Instantiated when the configuration is saved
          * Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
          */
         log.entering(this.getClass().getName(), "constructor");
         setSeleniumTests(seleniumTests);
-        System.out.print("*****credentials are***"+credentialsId);
+        System.out.print("*****credentials are***" + credentialsId);
         setCredentials(credentialsId);
         log.exiting(this.getClass().getName(), "constructor");
     }
 
-
     private List<JSONObject> seleniumTests;
-
 
     private void setSeleniumTests(List<JSONObject> seleniumTests) {
         if (seleniumTests == null) { // prevent null pointer
@@ -60,7 +56,7 @@ public class LTBuildWrapper extends BuildWrapper implements Serializable {
             this.username = this.authkey = "";
         }
         log.fine("setting credentials");
-        getDescriptor().setBuildCredentials(username,authkey);
+        getDescriptor().setBuildCredentials(username, authkey);
     }
 
     @Override
@@ -92,6 +88,24 @@ public class LTBuildWrapper extends BuildWrapper implements Serializable {
             return config;
         }
 
+        private void makeSeleniumBuildActionFromJSONObject(JSONObject config) {
+            log.entering(this.getClass().getName(), "makeSeleniumBuildActionFromJSONObject");
+            log.finest("JSONObject: " + config.toString());
+            String buildname = build.getFullDisplayName().substring(0, build.getFullDisplayName().length() - (String.valueOf(build.getNumber()).length() + 1));
+            String buildnumber = String.valueOf(build.getNumber());
+            String operatingSystemApiName = config.getString("operating_system");
+            String browserApiName = config.getString("browser");
+            String resolution = config.getString("resolution");
+            SeleniumBuildAction seBuildAction = new SeleniumBuildAction(operatingSystemApiName, browserApiName, resolution);
+            log.fine("created selenium build action for: " + seBuildAction.displayName);
+            seBuildAction.setBuild(build);
+            seBuildAction.setBuildName(buildname);
+            seBuildAction.setBuildNumber(buildnumber);
+            log.fine("adding build action");
+            build.addAction(seBuildAction);
+            log.exiting(this.getClass().getName(), "makeSeleniumBuildActionFromJSONObject");
+
+        }
 
         @Override
         public void buildEnvVars(Map<String, String> env) {
@@ -100,8 +114,10 @@ public class LTBuildWrapper extends BuildWrapper implements Serializable {
             String buildnumber = String.valueOf(build.getNumber());
             JSONArray browsers = new JSONArray();
             log.finest("seleniumTests.size(): " + seleniumTests.size());
+
             for (JSONObject config : seleniumTests) {
                 config = addBrowserNameToJSONObject(config);
+                makeSeleniumBuildActionFromJSONObject(config);
                 browsers.put(config);
                 Map<String, String> params = new HashMap<>();
                 Selenium selenium = new Selenium();
@@ -118,54 +134,32 @@ public class LTBuildWrapper extends BuildWrapper implements Serializable {
                     System.out.print(browserApiName);
                     Constants.browserVersion = arrOfBr[1] + ".0";
                     env.put(Constants.OPERATINGSYSTEM, operatingSystemApiName);
-                    Constants.output.put(Constants.OPERATINGSYSTEM,operatingSystemApiName);
-                    Constants.output.put(Constants.BROWSER,browserApiName);
-                    Constants.output.put(Constants.RESOLUTION,resolution);
+                    Constants.output.put(Constants.OPERATINGSYSTEM, operatingSystemApiName);
+                    Constants.output.put(Constants.BROWSER, browserApiName);
+                    Constants.output.put(Constants.RESOLUTION, resolution);
                     env.put(Constants.BROWSER, browserApiName);
                     env.put(Constants.RESOLUTION, resolution);
                     env.put(Constants.BROWSERNAME, browserName);
                     env.put(Constants.BROWSER_VERSION, Constants.browserVersion);
 
                 }
-                env.put(Constants.BROWSERS,browsers.toString());
-                Constants.output.put(Constants.BROWSERS,browsers.toString());
+                env.put(Constants.BROWSERS, browsers.toString());
+                Constants.output.put(Constants.BROWSERS, browsers.toString());
                 env.put(Constants.USERNAME, username);
                 env.put(Constants.APIKEY, authkey);
                 env.put(Constants.BUILDNAME, buildname);
                 env.put(Constants.BUILDNUMBER, buildnumber);
                 env.put(Constants.pluginUrl, "jenkins");
-                Constants.output.put(Constants.videoUrl,"https://www.lambdatest.com");
-                Constants.output.put(   Constants.logUrl,"https://www.360logica.com");
+                Constants.output.put(Constants.videoUrl, "https://www.lambdatest.com");
+                Constants.output.put(Constants.logUrl, "https://www.360logica.com");
                 //define grid url here
-                String gridurl= String.format("https://%s:%s@dev-ml.lambdatest.com/wd/hub",username,authkey );
-                env.put(Constants.GRID_URL,gridurl);
-                Constants.output.put(Constants.GRID_URL,gridurl);
+                String gridurl = String.format("https://%s:%s@dev-ml.lambdatest.com/wd/hub", username, authkey);
+                env.put(Constants.GRID_URL, gridurl);
+                Constants.output.put(Constants.GRID_URL, gridurl);
                 super.buildEnvVars(env);
                 System.out.println(Constants.output);
                 log.exiting(this.getClass().getName(), "buildEnvVars");
             }
-        }
-        private String generateReport(LTBuildResults stats) throws IOException {
-            ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-            try {
-                InputStream in = LTBuildResults.class.getResourceAsStream(Constants.REPORT_TEMPLATE_PATH);
-                if(in==null){
-                    System.out.println("file is null");
-                }
-                byte[] buffer = new byte[1024];
-                int read;
-                while ((read = in.read(buffer)) >= 0) {
-                    bOut.write(buffer, 0, read);
-                }
-            }catch (Exception c){
-
-            }
-            String content = new String(bOut.toByteArray(), StandardCharsets.UTF_8);
-            content = content.replace(Constants.STATUS, String.valueOf(stats.getStatus()));
-            content = content.replace(Constants.CONFIG_INFO, String.valueOf(stats.getConfigInfo()));
-            content = content.replace(Constants.VIDEO,Constants.output.get(Constants.videoUrl));
-            content = content.replace(Constants.LOGS,Constants.output.get(Constants.logUrl));
-            return content;
         }
 
         @Override
@@ -173,22 +167,10 @@ public class LTBuildWrapper extends BuildWrapper implements Serializable {
             log.entering(this.getClass().getName(), "teardown");
             listener.getLogger().println("-------Here are your environment variables-------------------");
             listener.getLogger().println("output of env" + Constants.output);
-            boolean status = true;
-            LTBuildResults result = new LTBuildResults(Constants.output.get(Constants.OPERATINGSYSTEM),Constants.output.get(Constants.BROWSER),status);
-            String report = generateReport(result);
-            File artifactsDir = build.getArtifactsDir();
-            if (!artifactsDir.isDirectory()) {
-                boolean success = artifactsDir.mkdirs();
-                if (!success) {
-                    listener.getLogger().println("Can't create artifacts directory at "
-                        + artifactsDir.getAbsolutePath());
-                }
+            for (JSONObject config : seleniumTests) {
+                makeSeleniumBuildActionFromJSONObject(config);
             }
-            String path = artifactsDir.getCanonicalPath() + Constants.REPORT_TEMPLATE_PATH;
-            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path),
-                StandardCharsets.UTF_8))) {
-                writer.write(report);
-            }
+
             return true;
         }
 

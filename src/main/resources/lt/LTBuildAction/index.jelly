@@ -1,0 +1,32 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
+    <l:layout>
+        <st:include it="${it.build}" page="sidepanel.jelly"/>
+        <l:main-panel>
+            <div style="border-style: solid;border-width: thin;">
+                <div style="text-align:left">
+                    <div align="center">
+                        <h3 style="color: red">TestType: ${it.testType}</h3>
+                        <table>
+                            <tr>
+                                <th>OS</th>
+                                <th>Browser</th>
+                                <th>Pass/Fail</th>
+                                <th>Joblinks</th>
+                            </tr>
+                        </table>
+                        <table>
+                            <tr>
+                                <td>${it.operatingSystem}</td>
+                                <td>${it.browser}</td>
+                                <td>${it.resolution}</td>
+                                <td>Pass</td>
+                                <td>https://www.lambdatest.com</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </l:main-panel>
+    </l:layout>
+</j:jelly>
